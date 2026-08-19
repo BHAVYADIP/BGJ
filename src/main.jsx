@@ -1,0 +1,10 @@
+import React, {useState} from 'react';
+import {createRoot} from 'react-dom/client';
+import './styles.css';
+
+function App(){
+ const [email,setEmail]=useState(''); const [loading,setLoading]=useState(false); const [message,setMessage]=useState('');
+ async function check(e){e.preventDefault(); setMessage(''); const v=email.trim().toLowerCase(); if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){setMessage('Enter a valid email address.');return;} setLoading(true); try{const r=await fetch('/api/breach-check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:v})}); const d=await r.json(); if(!r.ok) throw new Error(d.error||'Check failed'); setMessage(d.message||'Check completed.');}catch(x){setMessage(x.message)}finally{setLoading(false)}}
+ return <div className="app"><nav><div className="brand"><span>◉</span> BGJ <small>CYBER CHAUKIDAAR</small></div><a href="#how">How it works</a></nav><main><div className="badge">DIGITAL SECURITY MONITOR</div><h1>Know what is exposed.<br/><em>Protect what matters.</em></h1><p className="lead">Check whether an email address appears in known breach intelligence without exposing passwords or raw leaked records.</p><form onSubmit={check}><label>Email address</label><div className="search"><input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email"/><button disabled={loading}>{loading?'Checking…':'Check exposure →'}</button></div></form>{message&&<div className="notice">{message}</div>}<section id="how" className="cards"><article><b>01</b><h3>Email exposure</h3><p>Check an email against an authorized breach-intelligence provider.</p></article><article><b>02</b><h3>Privacy first</h3><p>Secrets stay on the server. BGJ does not store raw leaked credentials.</p></article><article><b>03</b><h3>Actionable results</h3><p>See exposure metadata and recommended next steps.</p></article></section></main><footer>BGJ Cyber Chaukidaar · Security monitoring interface</footer></div>
+}
+createRoot(document.getElementById('root')).render(<App/>);
