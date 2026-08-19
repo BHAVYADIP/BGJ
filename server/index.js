@@ -1,0 +1,14 @@
+import 'dotenv/config';
+import express from 'express';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const __dirname=path.dirname(fileURLToPath(import.meta.url));
+const app=express(); const port=Number(process.env.PORT||3000);
+app.use(helmet({crossOriginResourcePolicy:false})); app.use(express.json({limit:'10kb'}));
+const limiter=rateLimit({windowMs:60000,limit:20,standardHeaders:true,legacyHeaders:false});
+app.get('/api/health',(_,res)=>res.json({ok:true,service:'BGJ Cyber Chaukidaar'}));
+app.post('/api/breach-check',limiter,(req,res)=>{const email=typeof req.body?.email==='string'?req.body.email.trim().toLowerCase():'';if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return res.status(400).json({error:'A valid email address is required.'});if(!process.env.BREACH_PROVIDER_CONFIGURED)return res.json({configured:false,message:'The website is working. Breach-provider credentials have not been configured yet.'});return res.status(501).json({error:'Provider adapter is not enabled in this build.'});});
+app.use(express.static(path.join(__dirname,'..','dist')));
+app.listen(port,()=>console.log(`BGJ running on :${port}`));
